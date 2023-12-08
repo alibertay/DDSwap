@@ -3,7 +3,7 @@
     width: 100vw;
     background-image: url('background.svg');
     background-size: contain;
-    background-repeat: repeat-x;
+    background-repeat: repeat;
     background-position: center;
     display: flex;
     justify-content: center;
@@ -18,7 +18,35 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
+    position: fixed;
     top: 10%;
     left: 15%; 
+}
+
+button {
+    background-color: #06191B;
+    border: 0.2px solid #D89F0A;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 12vw;
+    height: 3vh;
+    margin: 46vh 0 0 28.5vw;
+}
+
+.button-text {
+    font-size: 1.5vw;
+    color: #D89F0A;
+}
+
+@media (max-width: 768px) {
+    button {
+        width: 12vw;
+        height: 3vh;
+    }
+
+    .button-text {
+        font-size: 1vw;
+    }
 }
