@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
+import changePNG from './change.png';
+
 
 function App() {
     const [buttonText, setButtonText] = useState("Connect Wallet");
@@ -23,6 +25,10 @@ function App() {
 
     function addLiq() {
         alert("Liq added");
+    }
+
+    function removeLiq() {
+        alert("Remove Liq");
     }
 
     function swapMenu() {
@@ -55,19 +61,88 @@ function App() {
         
     }
 
+    function change() {
+        alert("change");
+    }
+
     return (
         <div className="App">
             <div className="centered-div">
                 <span className="menu-text swap-text" style={{color: swapTextColor}} onClick={swapMenu}>Swap</span>
                 <span className="menu-text liq-text" style={{ color: liqTextColor }} onClick={liqMenu}>Liquidity</span>
                 {swapScreen ? (
-                    <button onClick={buttonAction}>
-                    <span className="button-text">{buttonText}</span>
-                    </button>
-                ) : (
-                        <button onClick={buttonAction}>
-                            <span className="button-text">{buttonText}</span>
+                    <div>
+
+                        <div className="input-container from-input-container">
+                            <input
+                                type="text"
+                                placeholder="0.0"
+                            />
+
+                            <select className="dropdown">
+                                <option value="">USDT</option>
+                                <option value="option1">ETH</option>
+                                <option value="option2">LINK</option>
+                            </select>
+                        </div>
+
+                        <button onClick={change} className="change-button">
+                            <img src={changePNG} alt="Change Button" />
                         </button>
+
+                        <div className="input-container to-input-container">
+                            <input
+                                type="text"
+                                placeholder="0.0"
+                            />
+
+                            <select className="dropdown">
+                                <option value="">ETH</option>
+                                <option value="option1">USDT</option>
+                                <option value="option2">LINK</option>
+                            </select>
+                        </div>
+
+                        <button onClick={buttonAction} className="swap-button">
+                        <span className="button-text">{buttonText}</span>
+                        </button>
+                    </div>
+                ) : (
+                        <div>
+                            <div className="input-container from-input-container">
+                                <input
+                                    type="text"
+                                    placeholder="0.0"
+                                />
+
+                                <select className="dropdown">
+                                    <option value="">USDT</option>
+                                    <option value="option1">ETH</option>
+                                    <option value="option2">LINK</option>
+                                </select>
+                            </div>
+
+                            {isWalletConnected ? (
+                                <div>
+                                <button onClick={removeLiq} className="remove-liq-button">
+                                    <span className="button-text">Remove Liquidity</span>
+                                </button>
+
+                                <button onClick={buttonAction} className="add-liq-button">
+                                        <span className="button-text">{buttonText}</span>
+                                    </button>
+                                </div>
+                            ) : 
+                        
+                                ( <div>
+                                    <button onClick={buttonAction} className="add-liq-button" style={{marginTop: '15vh'}}>
+                                        <span className="button-text">{buttonText}</span>
+                                    </button>
+                                    </div>
+                                )}
+
+                     
+                    </div>
                 )}
             </div>
         </div>

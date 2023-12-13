@@ -23,7 +23,7 @@
     left: 15%; 
 }
 
-button {
+.swap-button {
     background-color: #06191B;
     border: 0.2px solid #D89F0A;
     border-radius: 2px;
@@ -32,24 +32,46 @@ button {
     align-items: center;
     width: 12vw;
     height: 3vh;
-    margin: 23vh 0 0 28.5vw;
+    margin: 3vh 0 0 28.3vw;
+    cursor: pointer;
+}
+
+.add-liq-button {
+    background-color: #06191B;
+    border: 0.2px solid #D89F0A;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 12vw;
+    height: 3vh;
+    margin: 1vh 0 0 28.3vw;
+    cursor: pointer;
+}
+
+.remove-liq-button {
+    background-color: #06191B;
+    border: 0.2px solid #D89F0A;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 12vw;
+    height: 3vh;
+    margin: 11vh 0 0 28.3vw;
+    cursor: pointer;
+}
+
+.change-button {
+    margin: 2vh 0 0 33vw;
+    background-color: #051314;
+    border: 1px solid #051314;
     cursor: pointer;
 }
 
 .button-text {
-    font-size: 1.5vw;
+    font-size: 1vw;
     color: #D89F0A;
-}
-
-@media (max-width: 768px) {
-    button {
-        width: 12vw;
-        height: 3vh;
-    }
-
-    .button-text {
-        font-size: 1vw;
-    }
 }
 
 .menu-text {
@@ -65,4 +87,51 @@ button {
 
 .liq-text {
     margin: -4vh 40vh 0 32.5vw;
+}
+
+.input-container {
+    position: relative;
+    display: inline-block;
+}
+
+    .input-container input {
+        width: 11vw;
+        padding: 10px;
+        border: 1px solid #D89F0A;
+        border-radius: 4px;
+        height: 3vh;
+        background-color: #06191B;
+        color: #D89F0A;
+    }
+
+    .input-container .dropdown {
+        position: absolute;
+        top: 0;
+        right: 0;
+        border: 1px solid #D89F0A;
+        height: 100%;
+        padding: 0 10px;
+        background: transparent;
+        border-left: 1px solid #D89F0A;
+        background-color: #111819;
+        color: #D89F0A;
+    }
+
+.from-input-container {
+    margin: 3vh 55vh 0 28vw;
+}
+
+.to-input-container {
+    margin: 1.5vh 55vh 0 28vw;
+}
+
+@media (max-width: 768px) {
+    button {
+        width: 12vw;
+        height: 3vh;
+    }
+
+    .button-text {
+        font-size: 1vw;
+    }
 }
