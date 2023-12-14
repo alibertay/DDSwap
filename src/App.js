@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import changePNG from './change.png';
+import { ethers } from "ethers";
 
 
 function App() {
@@ -13,11 +14,49 @@ function App() {
 
     const [isWalletConnected, setIsWalletConnected] = useState(false);
 
-    function connectWallet() {
-        setIsWalletConnected(true);
-        setButtonText("Swap")
-        setButtonAction(() => swap);
+    async function connectWallet() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+                addSepoliaNetwork();
+                await provider.send("wallet_switchEthereumChain", [{ chainId: '0xaa36a7' }]); // Sepolia
+                setIsWalletConnected(true);
+                setButtonText("Swap")
+                setButtonAction(() => swap);
+
+                return provider;
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            console.log("Please install MetaMask!");
+        }
     }
+
+    async function addSepoliaNetwork() {
+        try {
+            await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                    chainId: '0xaa36a7', 
+                    rpcUrls: ['https://rpc.sepolia.org'], 
+                    chainName: 'Sepolia Test Network',
+                    nativeCurrency: {
+                        name: 'Sepolia Ether',
+                        symbol: 'ETH', 
+                        decimals: 18
+                    },
+                    blockExplorerUrls: ['https://sepolia.etherscan.io/']
+                }]
+            });
+        } catch (error) {
+            console.error('Error adding Sepolia Network:', error);
+        }
+    }
+
 
     function swap() {
         alert("Swapped");
