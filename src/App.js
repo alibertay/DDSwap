@@ -107,7 +107,7 @@ function App() {
         var signer = "";
 
         try {
-            // DEX kontratınızdaki removeLiq fonksiyonunu çağırın
+            // Contract interaction
             const dexContract = new ethers.Contract(DexContract, DexABI, signer);
             await dexContract.removeLiq(tokenContractAddress, tokenAmount);
         } catch (error) {
