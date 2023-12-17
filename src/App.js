@@ -14,6 +14,9 @@ function App() {
 
     const [isWalletConnected, setIsWalletConnected] = useState(false);
 
+    const DexABI = "";
+    const DexContract = "";
+
     async function connectWallet() {
         if (typeof window.ethereum !== 'undefined') {
             try {
@@ -62,13 +65,56 @@ function App() {
         alert("Swapped");
     }
 
-    function addLiq() {
-        alert("Liq added");
+    async function addLiquidity() {
+        if (!isWalletConnected) {
+            alert("Please connect your wallet first.");
+            return;
+        }
+
+        // TODO: Add them
+        const tokenAmount = 0;
+        const tokenContractAddress = "TOKEN";
+        var TokenABI = "";
+        var signer = "";
+
+        try {
+            // Get approve
+            const tokenContract = new ethers.Contract(tokenContractAddress, TokenABI, signer);
+            await tokenContract.approve(DexContract, tokenAmount);
+
+            // Contract interaction
+            const dexContract = new ethers.Contract(DexContract, DexABI, signer);
+            const ethersAmount = await dexContract.EthersAmount(tokenContractAddress);
+            const liqAmounts = await dexContract.LiqAmounts(tokenContractAddress);
+            const ethAmount = ethersAmount.mul(tokenAmount).div(liqAmounts);
+
+            await dexContract.addLiq(tokenContractAddress, tokenAmount, { value: ethAmount });
+        } catch (error) {
+            console.error('Error adding liquidity:', error);
+        }
     }
 
-    function removeLiq() {
-        alert("Remove Liq");
+
+    async function removeLiquidity() {
+        if (!isWalletConnected) {
+            alert("Please connect your wallet first.");
+            return;
+        }
+
+        // TODO: Add them
+        const tokenAmount = 0;
+        const tokenContractAddress = "";
+        var signer = "";
+
+        try {
+            // DEX kontratınızdaki removeLiq fonksiyonunu çağırın
+            const dexContract = new ethers.Contract(DexContract, DexABI, signer);
+            await dexContract.removeLiq(tokenContractAddress, tokenAmount);
+        } catch (error) {
+            console.error('Error removing liquidity:', error);
+        }
     }
+
 
     function swapMenu() {
         setSwapTextColor("#D89F0A");
@@ -93,7 +139,7 @@ function App() {
 
         if (isWalletConnected) {
             setButtonText("Add Liquidity");
-            setButtonAction(() => addLiq);
+            setButtonAction(() => addLiquidity);
         } else {
             setButtonText("Connect Wallet");
         }
@@ -119,9 +165,9 @@ function App() {
                             />
 
                             <select className="dropdown">
-                                <option value="">USDT</option>
-                                <option value="option1">ETH</option>
-                                <option value="option2">LINK</option>
+                                <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
+                                <option value="ETH">ETH</option>
+                                <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
                             </select>
                         </div>
 
@@ -136,9 +182,9 @@ function App() {
                             />
 
                             <select className="dropdown">
-                                <option value="">ETH</option>
-                                <option value="option1">USDT</option>
-                                <option value="option2">LINK</option>
+                                <option value="ETH">ETH</option>
+                                <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
+                                <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
                             </select>
                         </div>
 
@@ -155,15 +201,15 @@ function App() {
                                 />
 
                                 <select className="dropdown">
-                                    <option value="">USDT</option>
-                                    <option value="option1">ETH</option>
-                                    <option value="option2">LINK</option>
+                                    <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
+                                    <option value="ETH">ETH</option>
+                                    <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
                                 </select>
                             </div>
 
                             {isWalletConnected ? (
                                 <div>
-                                <button onClick={removeLiq} className="remove-liq-button">
+                                    <button onClick={removeLiquidity} className="remove-liq-button">
                                     <span className="button-text">Remove Liquidity</span>
                                 </button>
 
