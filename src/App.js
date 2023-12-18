@@ -14,6 +14,10 @@ function App() {
 
     const [isWalletConnected, setIsWalletConnected] = useState(false);
 
+    const [fromToken, setFromToken] = useState('ETH');
+    const [toToken, setToToken] = useState('ETH');
+    const [amount, setAmount] = useState('');
+
     const DexABI = "";
     const DexContract = "";
 
@@ -61,9 +65,43 @@ function App() {
     }
 
 
-    function swap() {
-        alert("Swapped");
+    async function swap() {
+        if (!isWalletConnected) {
+            alert("Please connect your wallet first.");
+            return;
+        }
+
+        // Ethers.js ile signer ve DEX kontratınızı tanımlayın
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const dexContract = new ethers.Contract(DexContract, DexABI, signer);
+
+        try {
+            // ERC20 Token için approve işlemi
+            if (ethers.utils.isAddress(fromToken) && fromToken !== 'ETH') {
+                var TokenABI = "";
+                const tokenContract = new ethers.Contract(fromToken, TokenABI, signer);
+                await tokenContract.approve(DexContract, ethers.utils.parseEther(amount));
+            }
+
+            // Swap işlemleri
+            if (fromToken === 'ETH' && ethers.utils.isAddress(toToken)) {
+                // ETH'den Token'e swap
+                await dexContract.swapEtherForToken(toToken, { value: ethers.utils.parseEther(amount) });
+            } else if (ethers.utils.isAddress(fromToken) && toToken === 'ETH') {
+                // Token'dan ETH'ye swap
+                await dexContract.swapTokenForEther(fromToken, ethers.utils.parseEther(amount));
+            } else if (ethers.utils.isAddress(fromToken) && ethers.utils.isAddress(toToken)) {
+                // Token'dan Token'e swap
+                await dexContract.swapTokenForToken(fromToken, ethers.utils.parseEther(amount), toToken);
+            } else {
+                alert("Invalid token selection.");
+            }
+        } catch (error) {
+            console.error('Swap error:', error);
+        }
     }
+
 
     async function addLiquidity() {
         if (!isWalletConnected) {
@@ -72,10 +110,12 @@ function App() {
         }
 
         // TODO: Add them
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+
         const tokenAmount = 0;
         const tokenContractAddress = "TOKEN";
         var TokenABI = "";
-        var signer = "";
 
         try {
             // Get approve
@@ -102,12 +142,14 @@ function App() {
         }
 
         // TODO: Add them
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+
         const tokenAmount = 0;
         const tokenContractAddress = "";
-        var signer = "";
 
         try {
-            // Contract interaction
+            // Remove Liq
             const dexContract = new ethers.Contract(DexContract, DexABI, signer);
             await dexContract.removeLiq(tokenContractAddress, tokenAmount);
         } catch (error) {
@@ -162,9 +204,13 @@ function App() {
                             <input
                                 type="text"
                                 placeholder="0.0"
+                                value={amount}
+                                onChange={e => setAmount(e.target.value)}
                             />
 
-                            <select className="dropdown">
+                            <select className="dropdown"
+                                value={fromToken}
+                                onChange={e => setFromToken(e.target.value)}>
                                 <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
                                 <option value="ETH">ETH</option>
                                 <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
@@ -181,7 +227,9 @@ function App() {
                                 placeholder="0.0"
                             />
 
-                            <select className="dropdown">
+                            <select className="dropdown"
+                                value={toToken}
+                                onChange={e => setToToken(e.target.value)}>
                                 <option value="ETH">ETH</option>
                                 <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
                                 <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
