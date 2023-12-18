@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import changePNG from './change.png';
 import { ethers } from "ethers";
-
+import DexABI from './DEXContractABI.json';
 
 function App() {
     const [buttonText, setButtonText] = useState("Connect Wallet");
@@ -18,8 +18,12 @@ function App() {
     const [toToken, setToToken] = useState('ETH');
     const [amount, setAmount] = useState('');
 
-    const DexABI = "";
-    const DexContract = "";
+    const [liquidityTokenAddress, setLiquidityTokenAddress] = useState('');
+    const [liquidityAmount, setLiquidityAmount] = useState('');
+
+    const DexContract = process.env.DEXContractAddress;
+
+    const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
     async function connectWallet() {
         if (typeof window.ethereum !== 'undefined') {
@@ -71,28 +75,28 @@ function App() {
             return;
         }
 
-        // Ethers.js ile signer ve DEX kontratınızı tanımlayın
+        // Contract
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const dexContract = new ethers.Contract(DexContract, DexABI, signer);
 
         try {
-            // ERC20 Token için approve işlemi
+            // Get Approve
             if (ethers.utils.isAddress(fromToken) && fromToken !== 'ETH') {
-                var TokenABI = "";
+                var TokenABI = fetchContractABI(fromToken);
                 const tokenContract = new ethers.Contract(fromToken, TokenABI, signer);
                 await tokenContract.approve(DexContract, ethers.utils.parseEther(amount));
             }
 
             // Swap işlemleri
             if (fromToken === 'ETH' && ethers.utils.isAddress(toToken)) {
-                // ETH'den Token'e swap
+                // ETH to Token
                 await dexContract.swapEtherForToken(toToken, { value: ethers.utils.parseEther(amount) });
             } else if (ethers.utils.isAddress(fromToken) && toToken === 'ETH') {
-                // Token'dan ETH'ye swap
+                // Token to ETH
                 await dexContract.swapTokenForEther(fromToken, ethers.utils.parseEther(amount));
             } else if (ethers.utils.isAddress(fromToken) && ethers.utils.isAddress(toToken)) {
-                // Token'dan Token'e swap
+                // Token to Token
                 await dexContract.swapTokenForToken(fromToken, ethers.utils.parseEther(amount), toToken);
             } else {
                 alert("Invalid token selection.");
@@ -102,6 +106,23 @@ function App() {
         }
     }
 
+    const fetchContractABI = async (contractAddress) => {
+        const url = `https://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.status === '1' && data.message === 'OK') {
+                return JSON.parse(data.result);
+            } else {
+                throw new Error('ABI not found');
+            }
+        } catch (error) {
+            console.error('Error fetching ABI:', error);
+            return null;
+        }
+    };
 
     async function addLiquidity() {
         if (!isWalletConnected) {
@@ -113,9 +134,9 @@ function App() {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
 
-        const tokenAmount = 0;
-        const tokenContractAddress = "TOKEN";
-        var TokenABI = "";
+        const tokenAmount = liquidityAmount;
+        const tokenContractAddress = liquidityTokenAddress;
+        var TokenABI = fetchContractABI(tokenContractAddress);
 
         try {
             // Get approve
@@ -145,8 +166,8 @@ function App() {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
 
-        const tokenAmount = 0;
-        const tokenContractAddress = "";
+        const tokenAmount = liquidityAmount;
+        const tokenContractAddress = liquidityTokenAddress;
 
         try {
             // Remove Liq
@@ -246,9 +267,13 @@ function App() {
                                 <input
                                     type="text"
                                     placeholder="0.0"
+                                    value={liquidityAmount}
+                                    onChange={e => setLiquidityAmount(e.target.value)}
                                 />
 
-                                <select className="dropdown">
+                                <select className="dropdown"
+                                    value={liquidityTokenAddress}
+                                    onChange={e => setLiquidityTokenAddress(e.target.value)}>
                                     <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
                                     <option value="ETH">ETH</option>
                                     <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
