@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import changePNG from './change.png';
 import { ethers } from "ethers";
@@ -24,6 +24,41 @@ function App() {
     const DexContract = process.env.DEXContractAddress;
 
     const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+
+    const [toAmount, setToAmount] = useState('');
+
+    useEffect(() => { calculatePrice(); }, [fromToken, toToken, amount]);
+
+    const calculatePrice = async () => {
+        if (!amount || isNaN(amount)) return;
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const contract = new ethers.Contract(DexContract, DexABI, provider);
+
+        try {
+            let price;
+
+            if (fromToken === 'ETH' && ethers.utils.isAddress(toToken)) {
+                // Case 1: ETH to selected token
+                price = await contract.getTokenForEtherPrice(toToken, ethers.utils.parseEther(amount));
+            } else if (ethers.utils.isAddress(fromToken) && toToken === 'ETH') {
+                // Case 2: selected token to ETH
+                price = await contract.getEtherForTokenPrice(fromToken, ethers.utils.parseEther(amount));
+            } else if (ethers.utils.isAddress(fromToken) && ethers.utils.isAddress(toToken)) {
+                // Case 3: token to token
+                price = await contract.getTokenForTokenPrice(fromToken, ethers.utils.parseEther(amount), toToken);
+            }
+
+            // Update the state with the formatted price
+            if (price) {
+                const formattedPrice = ethers.utils.formatEther(price);
+                setToAmount(formattedPrice); // Update the 'to' amount
+            }
+        } catch (error) {
+            console.error('Error calculating price:', error);
+        }
+    };
+
 
     async function connectWallet() {
         if (typeof window.ethereum !== 'undefined') {
@@ -67,7 +102,6 @@ function App() {
             console.error('Error adding Sepolia Network:', error);
         }
     }
-
 
     async function swap() {
         if (!isWalletConnected) {
@@ -155,7 +189,6 @@ function App() {
         }
     }
 
-
     async function removeLiquidity() {
         if (!isWalletConnected) {
             alert("Please connect your wallet first.");
@@ -177,7 +210,6 @@ function App() {
             console.error('Error removing liquidity:', error);
         }
     }
-
 
     function swapMenu() {
         setSwapTextColor("#D89F0A");
@@ -220,18 +252,23 @@ function App() {
                 <span className="menu-text liq-text" style={{ color: liqTextColor }} onClick={liqMenu}>Liquidity</span>
                 {swapScreen ? (
                     <div>
-
                         <div className="input-container from-input-container">
                             <input
                                 type="text"
                                 placeholder="0.0"
                                 value={amount}
-                                onChange={e => setAmount(e.target.value)}
+                                onChange={e => {
+                                    setAmount(e.target.value);
+                                    calculatePrice(e.target.value); // Calculate price when amount changes
+                                }}
                             />
 
                             <select className="dropdown"
                                 value={fromToken}
-                                onChange={e => setFromToken(e.target.value)}>
+                                onChange={e => {
+                                    setFromToken(e.target.value);
+                                    calculatePrice(amount, e.target.value); // Recalculate price if fromToken changes
+                                }}>
                                 <option value="0x7169D38820dfd117C3FA1f22a697dBA58d90BA06">USDT</option>
                                 <option value="ETH">ETH</option>
                                 <option value="0x779877A7B0D9E8603169DdbD7836e478b4624789">LINK</option>
@@ -246,6 +283,8 @@ function App() {
                             <input
                                 type="text"
                                 placeholder="0.0"
+                                value={toAmount} // Display the calculated toAmount here
+                                readOnly // Make the field read-only if desired
                             />
 
                             <select className="dropdown"
@@ -258,9 +297,10 @@ function App() {
                         </div>
 
                         <button onClick={buttonAction} className="swap-button">
-                        <span className="button-text">{buttonText}</span>
+                            <span className="button-text">{buttonText}</span>
                         </button>
                     </div>
+
                 ) : (
                         <div>
                             <div className="input-container from-input-container">
