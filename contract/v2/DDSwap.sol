@@ -6,9 +6,7 @@ interface IToken {
     function transferFrom(address from, address to, uint256 amount) external returns(bool); 
 }
 
-// TODO: token for stake
-// TODO: stake function
-// TODO: unstake function
+// TODO: stake interface and function calls
 // TODO: time limit for sepPools
 // TODO: sepPools for token2token
 
